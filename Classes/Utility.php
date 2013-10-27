@@ -3,6 +3,7 @@ require_once('Config.php');
 
 class CBSSports {
 	function __construct($entity){		
+		$this->ErrorMessage = array('place holder',);
 		$this->api = new Api();
 		$this->AccessToken = $this->api->AccessToken;
 		
@@ -11,7 +12,12 @@ class CBSSports {
 				break;
 			case 'ff_position':
 				break;
+			case 'ff_owner':
+				break;
+			case 'ff_team':
+				break;
 			default:
+				array_push($this->ErrorMessage, 'Undefined entity');
 				return FALSE;
 				break;
 		}
@@ -21,6 +27,7 @@ class CBSSports {
 		return TRUE;
 	}
 	
+	public $ErrorMessage;
 	public $AccessToken;
 	public $GetURL;
 	private $BaseURL = 'http://api.cbssports.com/fantasy/';
@@ -31,6 +38,8 @@ class CBSSports {
 	private $elements = array(
 		'nfl_player' => array ( 'element' => "players/list", 'suffix' => "SPORT=football" ),
 		'ff_position' => array ( 'element' => 'positions', 'suffix' => '' ),
+		'ff_team' => array( 'element' => 'league/teams', 'suffix' => '' ),
+		'ff_owner' => array( 'element' => 'league/owners', 'suffix' => ''),
 		
 	);
 
