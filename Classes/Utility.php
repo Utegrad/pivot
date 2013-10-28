@@ -16,6 +16,8 @@ class CBSSports {
 				break;
 			case 'ff_team':
 				break;
+			case 'nfl_team':
+				break;
 			default:
 				array_push($this->ErrorMessage, 'Undefined entity');
 				return FALSE;
@@ -40,7 +42,7 @@ class CBSSports {
 		'ff_position' => array ( 'element' => 'positions', 'suffix' => '' ),
 		'ff_team' => array( 'element' => 'league/teams', 'suffix' => '' ),
 		'ff_owner' => array( 'element' => 'league/owners', 'suffix' => ''),
-		
+		'nfl_team' => array( 'element' => 'pro-teams', 'suffix' => ''),
 	);
 
 	public function GetData(){
@@ -259,6 +261,13 @@ class Data {
 		}
 	}
 	
+	public function updateStmt($queryString, $typeString, array $parameters){
+		$this->query = $queryString;
+		$this->typeString = $typeString;
+		$this->parameters = $this->setParameters($parameters) ? $parameters : FALSE;
+		$this->stmtPrepare();
+	}
+	
 	public static function WithValues(&$dbConn, $query, $types, array $parameterValues){
 		$instance = new self();
 		$instance->_withValues($dbConn,$query,$types, $parameterValues);
@@ -268,10 +277,11 @@ class Data {
 		$this->query = $query;
 		$this->typeString = $types;
 		$this->dbConn = $dbConn;
-		$this->parameters = $this->setParameters($parameterValues) ? $parameterValues : NULL;
+		$this->parameters = $this->setParameters($parameterValues) ? $parameterValues : FALSE;
 		#$this->dataValidated = $this->matchTstring($this->typeString,$this->parameters, $this->query) ? TRUE : FALSE;
 		$this->stmtPrepare();
 	}
+	
 	public static function SelectFetchAll($query, &$dbConn){
 		$instance = new self();
 		$result = $instance->_selectFetchAll($query, $dbConn);
@@ -287,6 +297,14 @@ class Data {
 		return $data;
 	}
 	
+	public static function WithDbConn(&$dbConn){
+		$instance = new self();
+		$instance->_withDbConn($dbConn);
+		return $instance;
+	}
+	protected function _withDbConn(&$dbConn){
+		$this->dbConn = $dbConn;
+	}
 	/* Finish insert for ff_positions and then nfl_players*/
 	
 } // end class Data
