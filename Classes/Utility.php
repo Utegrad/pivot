@@ -57,8 +57,8 @@ class CBSSports {
 		'nfl_team' => array( 'element' => 'pro-teams', 'suffix' => ''),
 	);
     
-    /** Retreives JSON data from CBS Sports API
-     * @return object
+    /** Retreives JSON data from CBS Sports API or FALSE if http request error.
+     * @return object|bool
      */
 	public function GetData(){
 		$crl = curl_init();
@@ -67,13 +67,21 @@ class CBSSports {
 		curl_setopt($crl, CURLOPT_URL, $this->GetURL);
 		curl_setopt($crl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($crl, CURLOPT_CONNECTTIMEOUT, $this->timeout );
+		curl_setopt($crl, CURLINFO_HEADER_OUT, TRUE);
 		$ret = curl_exec($crl);
+		$curlInfo = curl_getinfo($crl);
+		if(curl_errno($crl) || $curlInfo['http_code'] >= 400 ){
+			$error = "Error from cURL curl_exec() (". curl_errno($crl) .") ". curl_error($crl) ."or http_code >= 400.";
+			array_push($this->ErrorMessage, $error);
+			curl_close($crl);
+			return FALSE;
+		}
 		curl_close($crl);
 		$data = json_decode($ret);
 		return $data;
 	}
 	
-}
+} // end class CBSSports
 
 /**
  * Helpers
