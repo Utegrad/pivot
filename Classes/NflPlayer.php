@@ -8,16 +8,25 @@ class NFLPlayer{
 		$this->Position = new FfPosition();
 	}
 	
+    /** @var int $Id nfl_players id */
 	public $Id;
 	public $FullName;
+    /** @var string $Pos position abbr from CBS Sports
 	public $Pos;
 	public $Status;
 	public $FirstName;
 	public $LastName;
+    /** @var int $ByeWeek bye_week data from CBS Sports
 	public $ByeWeek;
+    /** @var NflTeam $NFLTeam object from Classes/NflTeam.php */
 	public $NFLTeam;
+    /** @var FfPostion $Position object from Classes/FfPosition.php */
 	public $Position;
-	
+    
+	/** Allows creation of object by passing Json data to method
+     * @return object self()
+     * @param stdClass Json data from CBS Sports API data from Utility.php CBSSports::GetData() 
+     */
 	public static function withJson(stdClass $player){
 		$instance = new self();
 		$instance->loadByJson($player);

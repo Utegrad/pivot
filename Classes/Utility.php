@@ -1,7 +1,16 @@
 <?php
 require_once('Config.php');
 
+/** Tools for working with the CBS Sports Fantasy API
+ * 
+ * @author Matthew Larsen <matthew@utegrads.com>
+ */
 class CBSSports {
+    /** construct to assemble GetURL for the data set specified by $entity
+     * @param string $entity URL part to specialize the object to get the desired data
+     * from the API
+     * @return bool don't know if this is necessary
+     */
 	function __construct($entity){		
 		$this->ErrorMessage = array('place holder',);
 		$this->api = new Api();
@@ -28,8 +37,8 @@ class CBSSports {
 		$this->GetURL = $this->BaseURL. $this->Element .$this->URLSuffix;
 		return TRUE;
 	}
-	
-	public $ErrorMessage;
+	/** @var array $ErrorMessage errors encoutered by the object for troubleshooting */
+	public $ErrorMessage; 
 	public $AccessToken;
 	public $GetURL;
 	private $BaseURL = 'http://api.cbssports.com/fantasy/';
@@ -37,6 +46,9 @@ class CBSSports {
 	private $URLSuffix; 
 	private $timeout = 30;
 	private $api;
+	/** @var array $elements Possible URL elements from API sent to __construct($entity) to build the GET URL
+	 * for the desired data from the CBS Sports API
+	 */
 	private $elements = array(
 		'nfl_player' => array ( 'element' => "players/list", 'suffix' => "SPORT=football" ),
 		'ff_position' => array ( 'element' => 'positions', 'suffix' => '' ),
@@ -44,7 +56,10 @@ class CBSSports {
 		'ff_owner' => array( 'element' => 'league/owners', 'suffix' => ''),
 		'nfl_team' => array( 'element' => 'pro-teams', 'suffix' => ''),
 	);
-
+    
+    /** Retreives JSON data from CBS Sports API
+     * @return object
+     */
 	public function GetData(){
 		$crl = curl_init();
 		$timeout = 30;
@@ -60,6 +75,17 @@ class CBSSports {
 	
 }
 
+/**
+ * Helpers
+ * 
+ * helper methods for the Pivot application
+ * 
+ * @package Pivot
+ * @author Matthew Larsen <matthew@utegrads.com>
+ * @copyright 2013
+ * @version $Id$
+ * @access public
+ */
 class Helpers {
 	public static function searchIfExists($needle, $haystack ){
 		$exists = FALSE;
@@ -70,6 +96,18 @@ class Helpers {
 		}
 		return $exists;
 	}
+    
+	/**
+	 * Helpers::matchTstring()
+	 * 
+     * check that msyqli::stmt type string, parameters and query have matching count
+     * of parameters
+     * 
+	 * @param string $typeString types string for mysqli_stmt::bind_param method
+	 * @param array $paramArray array of variables passed to mysqli_stmt::bind_param method
+	 * @param string $query query string for mysqli_stmt::prepare method
+	 * @return bool
+	 */
 	public static function matchTstring($typeString, array $paramArray, $query){
 	  	$returnValue = FALSE;
 		$typeStringArray = str_split($typeString);
@@ -136,18 +174,27 @@ class Helpers {
 	} // end public static function matchTstring($typeString, array $paramArray, $query)
 } // end class Helpers
 
+/**
+ * Class for working with data from the ff_stats database and the CBS Sports API
+ */
 class Data {
 	function __construct(){
 		$this->errorMsg = array('place holder');
 	}
 	
+    /** @var string $query to be used by mysqli_stmt::prepare */
 	private $query;
+    /** @var object $dbConn prexisting mysqli object to be used for database queries */
 	private $dbConn;
+	/** @var array $parameters to hold paramaters to be passed to mysqli_stmt::bind_param() */
 	private $parameters = array();
+    /** @var string $typeString value to pass to mysqli_stmt::bind_param() to indicate data types going to the query */
 	private $typeString;
 	private $errorMsg;
 	
+    /** @var bool $dataValided indicator for success matchTstring() checking $typeString, $parameters, and $query */
 	public $dataValidated;	
+    /** @var object $stmt mysqli_stmt object derived from $dbConn */
 	public $stmt;
 	
 	public function GetErrorMsgs(){
@@ -166,6 +213,13 @@ class Data {
 		return $this->dataValidated;
 	}
 	
+    /**
+     * calls _matchTstring() method to match count of 
+     * $typeString, $paramArray[], and '?' in $query to see that they all have the same count
+     * @param string $typeString type string used by mysqli_stmt::bind_param
+     * @param array $paramArray paramater values passed to mysqli_stmt::bind_param
+     * @param string $query string to be used by mysqli_stmt::prepare()
+     */
 	public static function matchTstring($typeString, array $paramArray, $query){
 		$instance = new self();
 		$returnValue = $instance->_matchTstring($typeString, $paramArray, $query);
@@ -237,10 +291,16 @@ class Data {
 		if($returnValue == TRUE){ return TRUE;}
   	} // end public static function matchTstring($typeString, array $paramArray, $query)
 
+  	/**
+     * runs the mysqli_stmt::prepare() for $this->stmt object
+     */
 	private function stmtPrepare(){
 		$this->stmt = $this->dbConn->prepare($this->query);
 	}  	
 	
+    /**
+     * Binds variables saved in $this->paramaters to $this->stmt
+     */
 	public function bindParameters(){
 		if($this->dataValidated == TRUE && !empty($this->stmt)){
 			$paramArr = array($this->typeString);
@@ -261,6 +321,9 @@ class Data {
 		}
 	}
 	
+    /**
+     * Sets $this->stmt to mysqli_stmt object if previous one was closed or not created
+     */
 	public function updateStmt($queryString, $typeString, array $parameters){
 		$this->query = $queryString;
 		$this->typeString = $typeString;
@@ -268,6 +331,17 @@ class Data {
 		$this->stmtPrepare();
 	}
 	
+    /**
+     * Alternate way to create Data object without using the __construct()
+     * 
+     * Calls _withValues() to set parameters and return Data object.
+     * 
+     * @param object $dbConn pre-existing mysqli object for working with the database
+     * @param string $query string for use with mysqli_stmt::prepare()
+     * @param string $types to represent data types passed to  mysqli_stmt::bind_param()
+     * @param array $paramaterValues[] to set to $paramaters and use with mysqli_stmt::bind_param()
+     * @return Data object
+     */
 	public static function WithValues(&$dbConn, $query, $types, array $parameterValues){
 		$instance = new self();
 		$instance->_withValues($dbConn,$query,$types, $parameterValues);
@@ -282,6 +356,15 @@ class Data {
 		$this->stmtPrepare();
 	}
 	
+    /**
+     * Quick way to select and fetch all data from a table
+     * 
+     * Fetches all rows from queries without paramters like 'SELECT foo, bar, bah FROM table'.
+     * 
+     * @param string $query string to use with mysqli::query()
+     * @param mysqli $dbConn pre-existing mysqli object for working with the database
+     * @return array $result numeric indexed array with results from mysqli_fetch_all()
+     */
 	public static function SelectFetchAll($query, &$dbConn){
 		$instance = new self();
 		$result = $instance->_selectFetchAll($query, $dbConn);
