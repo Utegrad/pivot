@@ -60,7 +60,7 @@ foreach($curlNflPlayers->body->players as $player){
 	if(in_array($nflPlayer->Pos, $nflPlayer->Position->relivantPositions)){
 		$selectNflTeamQuery = "SELECT nfl_teams.id, nfl_teams.name, nfl_teams.nick_name
 			FROM nfl_teams WHERE nfl_teams.abvr = ?";
-		/* TODO create a $utilData object if I don't already have one because the player wasn't inserted in the database */
+		
 		if(!(isset($utilData))){
 			$utilData = Data::WithDbConn($database->conn);
 		}

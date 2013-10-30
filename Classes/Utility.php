@@ -9,9 +9,10 @@ class CBSSports {
     /** construct to assemble GetURL for the data set specified by $entity
      * @param string $entity URL part to specialize the object to get the desired data
      * from the API
+     * @param int id optional parameter for when cURL needs an id in the suffix
      * @return bool don't know if this is necessary
      */
-	function __construct($entity){		
+	function __construct($entity, $id = NULL){		
 		$this->ErrorMessage = array('place holder',);
 		$this->api = new Api();
 		$this->AccessToken = $this->api->AccessToken;
@@ -27,13 +28,20 @@ class CBSSports {
 				break;
 			case 'nfl_team':
 				break;
+            case 'nfl_player_profile':
+                break;
+            case 'rosters';
+                break;
 			default:
 				array_push($this->ErrorMessage, 'Undefined entity');
 				return FALSE;
 				break;
 		}
 		$this->Element = $this->elements[$entity]['element'];
-		$this->URLSuffix = "?version=2.0&access_token=". $this->AccessToken ."&response_format=json"."&".$this->elements[$entity]['suffix'];
+		if($id !== NULL) {
+		    $this->elements[$entity]['suffix'] .= $id;
+		}
+        $this->URLSuffix = "?version=2.0&access_token=". $this->AccessToken ."&response_format=json"."&".$this->elements[$entity]['suffix'];
 		$this->GetURL = $this->BaseURL. $this->Element .$this->URLSuffix;
 		return TRUE;
 	}
@@ -46,6 +54,7 @@ class CBSSports {
 	private $URLSuffix; 
 	private $timeout = 30;
 	private $api;
+    
 	/** @var array $elements Possible URL elements from API sent to __construct($entity) to build the GET URL
 	 * for the desired data from the CBS Sports API
 	 */
@@ -55,6 +64,8 @@ class CBSSports {
 		'ff_team' => array( 'element' => 'league/teams', 'suffix' => '' ),
 		'ff_owner' => array( 'element' => 'league/owners', 'suffix' => ''),
 		'nfl_team' => array( 'element' => 'pro-teams', 'suffix' => ''),
+		'nfl_player_profile' => array( 'element' => 'players/profile', 'suffix' => 'player_id='),
+		'rosters' => array( 'element' => 'league/rosters', 'suffix' => 'team_id=')
 	);
     
     /** Retreives JSON data from CBS Sports API or FALSE if http request error.
@@ -71,7 +82,8 @@ class CBSSports {
 		$ret = curl_exec($crl);
 		$curlInfo = curl_getinfo($crl);
 		if(curl_errno($crl) || $curlInfo['http_code'] >= 400 ){
-			$error = "Error from cURL curl_exec() (". curl_errno($crl) .") ". curl_error($crl) ."or http_code >= 400.";
+			$error = "Error from cURL curl_exec() (". curl_errno($crl) .") ". curl_error($crl) ."or http_code >= 400.
+			     $ret";
 			array_push($this->ErrorMessage, $error);
 			curl_close($crl);
 			return FALSE;
