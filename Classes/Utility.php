@@ -11,13 +11,15 @@ class CBSSports {
      * @return bool don't know if this is necessary
      */
 	function __construct($entity, $id = NULL){		
+		require_once('Config.php');
+		$this->api = new Api();
+		
+		$this->AccessToken = $this->api->AccessToken;
 		$this->entityString = $entity;
 		$this->suffixMod = $id;
 		$this->ErrorMessage = array();
-		require_once('Config.php');
-		$this->api = new Api();
-		$this->AccessToken = $this->api->AccessToken;
 		
+		//$returnValue = TRUE;
 		switch($this->entityString){
 			case 'nfl_player':
 				break;
@@ -35,6 +37,9 @@ class CBSSports {
                 break;
             case 'league/fantasy-points/weekly-scoring':
             	// should do some error checking on the suffix value because an empty string won't work here
+            	if($this->suffixMod === NULL){
+            		array_push($this->ErrorMessage, "No suffix passed for weekly scoring request");
+            	}
             	break;
             case 'league/dates' :
             	break;
@@ -45,20 +50,39 @@ class CBSSports {
 				return FALSE;
 				break;
 		}
-		$this->Element = $this->elements[$this->entityString]['element'];
-		if($id !== NULL) {
-		    $this->elements[$this->entityString]['suffix'] .= $id;
-		}
-        $this->URLSuffix = "?version=2.0&access_token=". $this->AccessToken ."&response_format=json"."&".$this->elements[$this->entityString]['suffix'];
-		$this->GetURL = $this->BaseURL. $this->Element .$this->URLSuffix;
-		return TRUE;
+		
+		$this->buildURL();
+		//return $returnValue;
+		
 	}
-	/** @var array $ErrorMessage errors encoutered by the object for troubleshooting */
+	
+	/**
+	 * errors encoutered by the object for troubleshooting
+	 * 
+	 *  @var array $ErrorMessage  
+	 */
 	public $ErrorMessage; 
+	/**
+	 * AccessToken passed in query string from CBS Sports API
+	 * 
+	 * Expries every 3 days if using from Config.php
+	 * 
+	 * @var string AccessToken
+	 */
 	public $AccessToken;
+	/**
+	 * The URL used to get data from CBS Sports
+	 * 
+	 * @var string GetURL
+	 */
 	public $GetURL;
+	
 	private $BaseURL = 'http://api.cbssports.com/fantasy/';
-	private $Element; # the part of the URL specific to what you're trying to _GET
+	/**
+	 * the part of the URL specific to what you're trying to _GET
+	 * @var string Element
+	 */
+	private $Element; 
 	/**
 	 * Takes the string passed to the $entity parameter in the constructor.  
 	 * 
@@ -77,8 +101,12 @@ class CBSSports {
 	private $suffixMod;
 	private $URLSuffix; 
 	private $timeout = 30;
+	/**
+	 * Object for holding API configuration information from Config.php
+	 * 
+	 * @var object api
+	 */
 	private $api;
-    
 	/** 
 	 * @var array $elements Possible URL elements from API sent to __construct($entity) to build the GET URL
 	 * for the desired data from the CBS Sports API
@@ -95,8 +123,8 @@ class CBSSports {
 		'league/dates' => array( 'element' => 'league/dates', 'suffix' => ''),
 		'league/details' => array( 'element' => 'league/details', 'suffix' => ''),
 	);
-    
-    /** 
+
+	/** 
      * Retreives JSON data from CBS Sports API or FALSE if http request error.
      * 
      * @return object|bool
@@ -123,23 +151,54 @@ class CBSSports {
 		return $data;
 	}
 	
-	public static function WithEntity(string $entityString, $suffixMod = NULL){
-		$instance = new self();
-		$instance->withEntity($entityString, $suffixMod);
+	/**
+	 * Alternate public static constructor for CBSSports object
+	 * 
+	 *  Used to create the CBSSports object and run GetData() in one step
+	 *  
+	 * @param string $entityString used for assembling private $GetURL
+	 * @param string $suffixMod optional suffix for GetURL
+	 * @return CBSSports | bool
+	 */
+	public static function WithEntity($entityString, $suffixMod = NULL){
+		$instance = new self($entityString, $suffixMod);
+		if(!empty($instance->ErrorMessage)){
+			return FALSE;
+		}
+		$instance->_withEntity();
 		return $instance;
 	}
-	protected function withEntity(string $entityString, $suffixMod){
-		$this->entityString = $entityString;
-		$this->suffixMod = $suffixMod;
+	protected function _withEntity(){
+		
+	}
+	
+	public static function GetJsonData($entity, $suffix = NULL){
+		$object = CBSSports::WithEntity($entity, $suffix);
+		if(empty($object->ErrorMessage)){
+			$data = $object->GetData();
+			if($data != FALSE){
+				$resultSet = array( 'object' => $object, 'data' => $data );
+				return $resultSet;
+			}
+			else{
+				return false;
+			}
+		}
+		else{
+			return FALSE;
+		}
 	}
 	
 	/**
-	 * @todo modify the class to build from static method or new directive.  
-	 * The purpose being to use a single method to create the object and pull the data I want
-	 * instead of handling both manually in 8 lines of code instead of 1 to 3. 
+	 * Sets the object properties to build the GetURL for the BaseURL, Element, and URL Suffix
 	 */
 	protected function buildURL(){
-		
+		$this->Element = $this->elements[$this->entityString]['element'];
+		if($this->suffixMod !== NULL) {
+			$this->elements[$this->entityString]['suffix'] .= $this->suffixMod;
+		}
+		$this->URLSuffix = "?version=2.0&access_token=". $this->AccessToken ."&response_format=json"."&".$this->elements[$this->entityString]['suffix'];
+		$this->GetURL = $this->BaseURL. $this->Element .$this->URLSuffix;
 	}
 	
 	

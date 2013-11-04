@@ -44,13 +44,13 @@ for ($i = 0; $i < $seasonWeeks; $i++) {
 
 print_r($insertWeeks);
 
-if($database->conn->query($insertWeeks)){
+/* if($database->conn->query($insertWeeks)){
 	printf("\n%d row(s) inserted.\n",$database->conn->affected_rows);
 }
 else{
 	echo "\nFailed to insert data: (". $database->conn->errno .") ". $database->conn->error ."\n";
 }
-
+ */
 
 $database->conn->close();
 

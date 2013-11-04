@@ -311,14 +311,14 @@ CREATE TABLE `nfl_players_weekly_scores` (
   `nfl_player_id` int(11) NOT NULL,
   `ff_week_id` int(11) NOT NULL,
   `score` int(11) NOT NULL DEFAULT '0',
-  `nfl_player_statuse_id` int(11) NOT NULL,
+  `nfl_player_status_id` int(11) NOT NULL,
   PRIMARY KEY (`nfl_player_id`,`ff_week_id`),
   KEY `fk_nfl_players_weekly_scores_nfl_players1_idx` (`nfl_player_id`),
   KEY `fk_nfl_players_weekly_scores_ff_weeks1_idx` (`ff_week_id`),
-  KEY `fk_nfl_players_weekly_scores_nfl_player_statuses1_idx` (`nfl_player_statuse_id`),
+  KEY `fk_nfl_players_weekly_scores_nfl_player_statuses1_idx` (`nfl_player_status_id`),
   CONSTRAINT `fk_nfl_players_weekly_scores_nfl_players1` FOREIGN KEY (`nfl_player_id`) REFERENCES `nfl_players` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `fk_nfl_players_weekly_scores_ff_weeks1` FOREIGN KEY (`ff_week_id`) REFERENCES `ff_weeks` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_nfl_players_weekly_scores_nfl_player_statuses1` FOREIGN KEY (`nfl_player_statuse_id`) REFERENCES `nfl_player_statuses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT `fk_nfl_players_weekly_scores_nfl_player_statuses1` FOREIGN KEY (`nfl_player_status_id`) REFERENCES `nfl_player_statuses` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
