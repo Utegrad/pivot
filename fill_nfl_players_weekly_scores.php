@@ -33,18 +33,32 @@ $basket = 100;
  * in one big chunk.
  */
 for ($i = 0; $i < $playersScoringCount; $i++) {
-	
 		if (in_array($cbsWeeklyScoring['data']->body->weekly_scoring->players[$i]->id, $dbNflPlayerIds)) {
 			if($i > 0 && $i % $basket == 0){
 				echo "\nAt $i Run insert.";
+				// insert values collected in $records
+				insQuery($records);
+				// empty $records
+				unset($records);
+				$records = array();
 			}
 			$weeklyScoresCount = count($cbsWeeklyScoring['data']->body->weekly_scoring->players[$i]->periods);
 			for ($j = 0; $j < $weeklyScoresCount; $j++) {
-				populateRecords($i, $j);
+				// if $records count == 0 then start first value with select
+				if (count($records) == 0) {
+					populateRecords($i, $j, TRUE);
+				}
+				else{
+					// otherwise, start with UNION ALL SELECT
+					populateRecords($i, $j);
+				}
+				// for the last player from curl request do final insert
 			}
-			
 			if ($i == $playersScoringCount -1) {
-			echo "\nLast Record at $i";
+				echo "\nLast Record at $i";
+				insQuery($records);
+				unset($records);
+				$records = array();
 			}
 		}
 		else{
@@ -87,8 +101,8 @@ function populateRecords($playerIndex, $periodIndex, $start = FALSE){
 	global $records, $statusIdSelect;
 	if($start == TRUE){
 		// empty $records[] to fill it with next batch
-		unset($records);
-		$records = array();
+		//unset($records);
+		//$records = array();
 		$rec = "SELECT '". getPlayerId($playerIndex) ."' , (". getWeekIdSelect($playerIndex, $periodIndex) .") , '".
 				getPlayerWeekScore($playerIndex, $periodIndex) ."' , (". $statusIdSelect .")";
 		array_push($records, $rec);
@@ -110,57 +124,7 @@ function insQuery($records){
 	}
 }
 
-/* $recCount = count($records);
-$batch1 = array();
-$batch2 = array();
-$batch3 = array();
-$batch4 = array();
-$batch5 = array();
-$allBatches = array();
-array_push($allBatches, $batch1);
-array_push($allBatches, $batch2);
-array_push($allBatches, $batch3);
-array_push($allBatches, $batch4);
-array_push($allBatches, $batch5);
-
-for ($i = 0; $i < $recCount; $i++) {
-	
-	if ($i < 300) {
-		array_push($batch1, $records[$i]);
-	}
-	if (($i >= 300) && ($i < 600)) {
-		array_push($batch2, $records[$i]);
-	}
-	if (($i >= 600) && ($i < 900)) {
-		array_push($batch3, $records[$i]);
-	}
-	if (($i >= 900) && ($i < 1200)) {
-		array_push($batch4, $records[$i]);
-	}
-	if ($i > 1200) {
-		array_push($batch5, $records[$i]);
-	}
-	
-}
-
-foreach ($allBatches as $batches){
-	foreach ($batches as $batch){
-		print_r($batch);
-	}
-}
- */
-
-
 //print_r($records);
-
-/* if($database->conn->query($insertPlayerWeeklyScores .' '. implode(' ', $records))){
-	printf("\n%d row(s) inserted.\n",$database->conn->affected_rows);
-}
-else{
-	echo "\nFailed to insert data: (". $database->conn->errno .") ". $database->conn->error ."\n";
-} */
-
-//echo "$insertPlayerWeeklyScores";
 
 $database->conn->close();
 ?>
