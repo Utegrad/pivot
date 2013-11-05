@@ -26,7 +26,7 @@ $playersScoringCount = count($cbsWeeklyScoring['data']->body->weekly_scoring->pl
 $statusIdSelect = "SELECT id FROM nfl_player_statuses WHERE abvr = 'A'";
 
 $records = array();
-$basket = 300;
+$basket = 100;
 
 /**
  * @todo work out a way to run the insert over multiple batches rather than 
@@ -35,12 +35,16 @@ $basket = 300;
 for ($i = 0; $i < $playersScoringCount; $i++) {
 	
 		if (in_array($cbsWeeklyScoring['data']->body->weekly_scoring->players[$i]->id, $dbNflPlayerIds)) {
-			if ($i % $basket == 0) {
-				
+			if($i > 0 && $i % $basket == 0){
+				echo "\nAt $i Run insert.";
 			}
 			$weeklyScoresCount = count($cbsWeeklyScoring['data']->body->weekly_scoring->players[$i]->periods);
 			for ($j = 0; $j < $weeklyScoresCount; $j++) {
 				populateRecords($i, $j);
+			}
+			
+			if ($i == $playersScoringCount -1) {
+			echo "\nLast Record at $i";
 			}
 		}
 		else{
@@ -79,17 +83,19 @@ function concatInsPWS($playerIndex, $periodIndex){
 	}
 }
 
-function populateRecords($playerIndex, $periodIndex){
+function populateRecords($playerIndex, $periodIndex, $start = FALSE){
 	global $records, $statusIdSelect;
-	
-	if($playerIndex == 0 && $periodIndex == 0 ){
-		$rec = "SELECT '". getPlayerId($playerIndex) ."' , (". getWeekIdSelect($playerIndex, $periodIndex) .") , '". 
-			getPlayerWeekScore($playerIndex, $periodIndex) ."' , (". $statusIdSelect .")";
+	if($start == TRUE){
+		// empty $records[] to fill it with next batch
+		unset($records);
+		$records = array();
+		$rec = "SELECT '". getPlayerId($playerIndex) ."' , (". getWeekIdSelect($playerIndex, $periodIndex) .") , '".
+				getPlayerWeekScore($playerIndex, $periodIndex) ."' , (". $statusIdSelect .")";
 		array_push($records, $rec);
 	}
 	else{
 		$rec = "UNION ALL SELECT '". getPlayerId($playerIndex) ."' , (". getWeekIdSelect($playerIndex, $periodIndex).
-			") , '". getPlayerWeekScore($playerIndex, $periodIndex) ."' , (". $statusIdSelect .")";
+		") , '". getPlayerWeekScore($playerIndex, $periodIndex) ."' , (". $statusIdSelect .")";
 		array_push($records, $rec);
 	}
 }
