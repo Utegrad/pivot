@@ -1,0 +1,30 @@
+@CHARSET "ISO-8859-1";
+
+.DataTable{
+	padding: 2px;
+	margin: 5px 0px 10px;
+	border-collapse: collapse;
+}
+.row{
+	
+}
+.darkRow{
+	background-color: #D7D7D7;
+}
+.lightRow{
+	background-color: #FFFFFF;
+}
+.rowHead{
+	background-color: #94B8FF;
+	text-align: center;
+	vertical-align: middle;
+	font-size: larger;
+}
+.dataCell{
+	padding: 2px 5px;
+}
+.headingCell{
+	padding: 5px 10px;
+	/* border: 1px solid #D7D7D7; */
+	/* border-radius: 10px; */
+}

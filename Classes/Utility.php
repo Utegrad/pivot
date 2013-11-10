@@ -301,6 +301,26 @@ class Helpers {
 		}
 		if($returnValue == TRUE) return TRUE;
 	} // end public static function matchTstring($typeString, array $paramArray, $query)
+
+	public static function sd($array){
+		/* return sqrt(
+				array_sum(
+						array_map(
+								array($this, 'sd_square'), 
+								$array, 
+								array_fill(0, count($array), (array_sum($array) / count($array)))
+						) / (count($array))
+					)
+				); */
+		return sqrt(
+				array_sum(
+						array_map(
+								'Helpers::sd_square', $array, array_fill(0,count($array), (array_sum($array) / count($array)) )
+		 				)
+		 		) / (count($array)) );
+	}
+	private function sd_square($x, $mean){ return pow($x - $mean,2); }
+
 } // end class Helpers
 
 /**
@@ -494,19 +514,29 @@ class Data {
      * @param mysqli $dbConn pre-existing mysqli object for working with the database
      * @return array $result numeric indexed array with results from mysqli_fetch_all()
      */
-	public static function SelectFetchAll($query, &$dbConn){
+	public static function SelectFetchAll($query, &$dbConn, $assoc = FALSE){
 		$instance = new self();
-		$result = $instance->_selectFetchAll($query, $dbConn);
+		$result = $instance->_selectFetchAll($query, $dbConn, $assoc);
 		return $result;
 	}
-	protected function _selectFetchAll($query, &$dbConn){
+	protected function _selectFetchAll($query, &$dbConn, $assoc = FALSE){
 		if(!($result = $dbConn->query($query))){
 			echo "Query failed: (". $dbConn->errno .") ". $dbConn->error;
 			return FALSE;
 		}
-		$data = $result->fetch_all(MYSQLI_NUM);
-		$result->close();
-		return $data;
+		if ($assoc === FALSE) {	
+			$data = $result->fetch_all(MYSQLI_NUM);
+			$result->close();
+			return $data;
+		}
+		else{
+			$data = array();
+			while($row = $result->fetch_assoc()){
+				array_push($data, $row);
+			}
+			$result->free();
+			return $data;
+		}
 	}
 	
 	public static function WithDbConn(&$dbConn){

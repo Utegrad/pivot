@@ -1,71 +1,60 @@
-<?php
+<?php 
+// any session or preprocessing 
+require 'bootstrap.php';
+$database = new Database();
 
-function echoPlayer($player)
-{
-	$name = $player->fullname;
-	$pos = $player->position;
-	$pro_team = $player->pro_team;
-	echo "<tr><td>$name</td><td>$pos</td><td>$pro_team</td><td>$player->id</tr>";
+// Gather page data to display
+require APP_ROOT .'Classes/Utility.php';
+
+$q = "SELECT * from v_nfl_players_avg_scores";
+$nflPlayerAvgs = Data::SelectFetchAll($q, $database->conn, TRUE);
+
+// average of all player averages
+$total = 0;
+$avgs = array();
+foreach ($nflPlayerAvgs as &$player){
+	$total += $player['avg_score'];
+	array_push($avgs, $player['avg_score']);
 }
 
-$access_token = $_GET['access_token'];
-$crl = curl_init();
-$timeout = 30;
-# curl_setopt($crl, CURLOPT_URL,
-#   "http://api.cbssports.com/fantasy/league/teams?access_token=$access_token&response_format=json");
-curl_setopt($crl, CURLOPT_URL,
-   "http://api.cbssports.com/fantasy/players/list?version=2.0&access_token=$access_token&response_format=json");
+$avg = $total / count($avgs);
+$sd = Helpers::sd($avgs);
+$max = max($avgs);
+$min = ceil($sd);
+$avgScoreBuckets = array( (ceil($sd)), (2 * ceil($sd)), (3 * ceil($sd)), (4 * ceil($sd)) );
 
-curl_setopt($crl, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($crl, CURLOPT_CONNECTTIMEOUT, $timeout );
-$ret = curl_exec($crl);
-curl_close($crl);
-$data = json_decode($ret);
-echo "<html>";
-echo "<p>$access_token</p>";
-echo "<table>";
-$players = $data->body->players;
-echo "<tr><td>Full name</td><td>Position</td><td>Pro Team</td><td>Player ID</td></tr>";
-foreach($players as $player)
-{
-	switch ($player->position){
-		case "DST":
-			echoPlayer($player);
-			break;
-		case "RB":
-			echoPlayer($player);
-			break;
-		case "WR":
-			echoPlayer($player);
-			break;
-		case "QB":
-			echoPlayer($player);
-			break;
-		case "TE":
-			echoPlayer($player);
-			break;
-		case "K":
-			echoPlayer($player);
-			break;
+foreach ($nflPlayerAvgs as $key => $value){
+	if ($value['avg_score'] > $min) {
+		$nflPlayerAvgs[$key]['scale'] = 100 * (round(($value['avg_score'] / $max), 2));
+		if($value['avg_score'] > $avgScoreBuckets[0] && $value['avg_score'] <= $avgScoreBuckets[1]){
+			$nflPlayerAvgs[$key]['rating'] = 'Average';
+		}
+		elseif ($value['avg_score'] > $avgScoreBuckets[1] && $value['avg_score'] <= $avgScoreBuckets[2]){
+			$nflPlayerAvgs[$key]['rating'] = 'Good';
+		}
+		elseif ($value['avg_score'] > $avgScoreBuckets[2] && $value['avg_score'] <= $avgScoreBuckets[3]){
+			$nflPlayerAvgs[$key]['rating'] = 'Great';
+		}
+		elseif ($value['avg_score'] > $avgScoreBuckets[3] ) {
+			$nflPlayerAvgs[$key]['rating'] = 'Outstanding';
+		}
 	}
-	
+	else{
+		$nflPlayerAvgs[$key]['scale'] = 0;
+		$nflPlayerAvgs[$key]['rating'] = "Don't bother";
+	}
 }
 
+require APP_ROOT . 'Control/AvgScoreData.php';
+
+$styleSheets = array(
+		'Default' => 'View/CSS/default.css',
+		'DataTable' => 'View/CSS/DataTable.css',
+	);
 
 
-/*
-$teams = $data->body->teams;
-foreach ( $teams as $team ) {
-    $name = $team->name;
-    $logo = $team->logo;
-    echo "<tr><td><img src='$logo'></td><td>$name</td>";
-    $owners = $team->owners;
-    foreach ( $owners as $owner ) {
-        $ownname = $owner->name;
-        echo "<td>$ownname</td>";
-    }
-    echo "</tr>";
-}
-*/
-echo "</table></html>";
+require 'page.php';
+
 ?>
+
+
