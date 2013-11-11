@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<?php foreach($styleSheets as $sheet): ?>
+<?php foreach($App->StyleSheets as $key => $sheet): ?>
+	<!-- StyleSheet: <?php echo $key; ?> -->
 	<link REL="stylesheet" type="text/css" href="<?php echo $APP_URL . $sheet; ?>" />
 <?php endforeach; ?>
 <title>Insert title here</title>

@@ -321,6 +321,17 @@ class Helpers {
 	}
 	private function sd_square($x, $mean){ return pow($x - $mean,2); }
 
+	/**
+	 * returns 36 char GUID
+	 * @return string
+	 */
+	public  static function getGUID(){
+	if (function_exists('com_create_guid')){
+		return trim(com_create_guid(), '{}');
+	}else{
+		return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
+	}
+}
 } // end class Helpers
 
 /**
@@ -328,7 +339,7 @@ class Helpers {
  */
 class Data {
 	function __construct(){
-		$this->errorMsg = array('place holder');
+		
 	}
 	
     /** @var string $query to be used by mysqli_stmt::prepare */
@@ -339,7 +350,7 @@ class Data {
 	private $parameters = array();
     /** @var string $typeString value to pass to mysqli_stmt::bind_param() to indicate data types going to the query */
 	private $typeString;
-	private $errorMsg;
+	private $errorMsg = array();
 	
     /** @var bool $dataValided indicator for success matchTstring() checking $typeString, $parameters, and $query */
 	public $dataValidated;	
@@ -547,7 +558,42 @@ class Data {
 	protected function _withDbConn(&$dbConn){
 		$this->dbConn = $dbConn;
 	}
-	/* Finish insert for ff_positions and then nfl_players*/
+	
+	/**
+	 * return the number of rows in the specified table
+	 * 
+	 * @param string $table table to get row count on 
+	 * @param string $col optional column to get row count against, could use '*', default is 'id'
+	 * @param mysqli $dbConn optional database connection resource to use
+	 * @return boolean|string
+	 */
+	public static function GetTableRowCount($table, $col = NULL, &$dbConn = NULL){
+		if(empty($table) ){
+			return FALSE;
+		}
+		$col = ($col === NULL ? 'id' : $col);
+		if ($dbConn === null) {
+			require_once 'Config.php';
+			$db = new Database();
+			if(!(empty($db->errorMsgs))){
+				return FALSE;
+			}
+			else{
+				$conn = &$db->conn;
+			}
+		}
+		if(!($result = $conn->query("SELECT COUNT($col) as num FROM $table"))){
+			$conn->close();
+			return FALSE;
+		}
+		else{
+			$count = $result->fetch_assoc();
+			$count = $count['num'];
+			$conn->close();
+			return $count;
+		}
+	}
+	
 	
 } // end class Data
 ?>
