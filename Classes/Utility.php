@@ -21,9 +21,9 @@ class CBSSports {
 		
 		//$returnValue = TRUE;
 		switch($this->entityString){
-			case 'nfl_player':
+			case self::NFL_PLAYER:
 				break;
-			case 'ff_position':
+			case self::FF_POSITION:
 				break;
 			case 'ff_owner':
 				break;
@@ -53,8 +53,48 @@ class CBSSports {
 		
 		$this->buildURL();
 		//return $returnValue;
-		
 	}
+	
+	/**
+	 * nfl_player data elements of the cURL urls.
+	 */
+	const NFL_PLAYER = 'nfl_player'; 
+	/**
+	 * fantasy football position data elements of the cURL urls.
+	 */
+	const FF_POSITION = 'ff_position';
+	/**
+	 * fantasy football team owner data elements of the cURL urls.
+	 */
+	const FF_OWNER = 'ff_owner';
+	/**
+	 * fantasy football team data elements of the cURL urls.
+	 */
+	const FF_TEAM = 'ff_team';
+	/**
+	 * nfl team data elements of the cURL urls.
+	 */
+	const NFL_TEAM = 'nfl_team';
+	/**
+	 * nfl player profile data elements of the cURL urls.
+	 */
+	const NFL_PLAYER_PROFILE = 'nfl_player_profile';
+	/**
+	 *  fantasy football team roster data elements of the cURL urls.
+	 */
+	const ROSTERS = 'rosters';
+	/**
+	 * fantasy weekly points scoring data elements of the cURL urls.
+	 */
+	const FPSWS = 'league/fantasy-points/weekly-scoring';
+	/**
+	 * fantasy league date data elements of the cURL urls.
+	 */
+	const DATES = 'league/dates';
+	/**
+	 * fantasy league detail data elements of the cURL urls.
+	 */
+	const DETAILS = 'league/details';
 	
 	/**
 	 * errors encoutered by the object for troubleshooting

@@ -5,11 +5,18 @@
 		$this->PositionGroup = new FfStatsGroup();
 	}
 	
+	const QB = 'QB';
+	const RB = 'RB';
+	const WR = 'WR';
+	const TE = 'TE';
+	const DST = 'DST';
+	const K = 'K';
+	
 	public $PositionGroup = null;
 	public $Abbr;
 	public $Name;
 	public $Desc;
-	public $relivantPositions = array("QB", "RB", "WR", "TE", "DST", "K");
+	public $relivantPositions = array(self::QB, self::RB, self::WR, self::TE, self::DST, self::K);
 	
 	public static function withJson(stdClass $position){
 		$instance = new self();

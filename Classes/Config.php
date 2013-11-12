@@ -30,8 +30,8 @@ class App {
 }
 
 class Api {
-	function __construct() {
-		// $this->_setAccessToken();
+	function __construct($token = NULL) {
+		$this->_setAccessToken($token);
 	}
 	
 	public $AccessToken;
@@ -44,8 +44,8 @@ class Api {
 	 * @return string|boolean $this->AccessToken or FALSE
 	 */
 	public static function TouchToken($token = NULL){
-		$instance = new self();
-		if($instance->_setAccessToken($token)){
+		$instance = new self($token);
+		if(!(empty($instance->AccessToken))){
 			return $instance->AccessToken;
 		}
 		else{
@@ -92,7 +92,7 @@ class Api {
 					}
 				}
 			}
-			else{ // no $token given 
+			else{ // no $token given - not running from CBS Sports iFrame
 				// get token from the database
 				$selectAccessToken = "SELECT access_token FROM app_config WHERE id = '". App::GetAppGuid() ."'";
 				$db = new Database();
@@ -122,12 +122,14 @@ class Api {
 	protected function _dbUpdateAccessToken($token, &$dbConn = NULL){
 		require_once 'Utility.php';
 		$appGUID = App::GetAppGuid();
+		global $LOG;
 		$updateTokenQuery = "UPDATE app_config SET access_token = ? WHERE id = '". $appGUID ."'";
 		$insertNewToken = "INSERT INTO app_config VALUES (? , ? , NULL)";
 		$closeDbRes = FALSE;
 		
 		// create a database connection if we don't have one passed
 		if ($dbConn === NULL) {
+			$LOG->logInfo('creating new database object');
 			$db = new Database();
 			if($db->conn){
 				$conn = $db->conn;
@@ -143,7 +145,7 @@ class Api {
 		}
 		
 		
-		if (!(strlen($token) != 128)) { // didn't get a token of the right length
+		if ((strlen($token) != 128)) { // didn't get a token of the right length
 			array_push($this->Errors, 'Invalid $token passed to _dbUpdateAccessToken()');
 			//$conn->close();
 			if($closeDbRes == TRUE){ $db->conn->close(); }
@@ -161,7 +163,7 @@ class Api {
 				$count = $count['num'];
 			}
 			// if guid + token pair in database, update token
-			if($count >= 0){
+			if($count > 0){
 				$tokenData = Data::WithValues($conn, $updateTokenQuery, 's', array($token) );
 				$tokenData->bindParameters();
 				if(!($tokenData->stmt->execute())){
@@ -177,7 +179,8 @@ class Api {
 				}
 			}
 			else{ // if no guid + token pair, insert pair
-				$newGuid = Helpers::getGUID();
+				// check for App::APP_GUID
+				$newGuid = App::APP_GUID;
 				$newPairData = Data::WithValues($conn, $insertNewToken, 'ss', array($newGuid, $token));
 				$newPairData->bindParameters();
 				if(!($newPairData->stmt->execute())){
@@ -187,7 +190,7 @@ class Api {
 					return FALSE;
 				}
 				else{
-					$tokenData->stmt->close();
+					$newPairData->stmt->close();
 					if($closeDbRes == TRUE){ $db->conn->close(); }
 					return TRUE;
 				}
@@ -212,7 +215,7 @@ class Database {
 		'host' => 'localhost',
 		'username' => 'FFApplication',
 		'password' => 'keep0ut!',
-		'database' => 'ff_stats'
+		'database' => 'dev_ff_stats'
 	);
 	public $errorMsgs = array();
 	public $conn;	
