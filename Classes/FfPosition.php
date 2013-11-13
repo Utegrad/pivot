@@ -31,15 +31,15 @@
 		switch($position->stats_group){
 			case 'Offensive':
 				$this->PositionGroup->FF_StatsGroupName = $position->stats_group;
-				$this->PositionGroup->FF_StatsGroupId = 3;
+				//$this->PositionGroup->FF_StatsGroupId = 3;
 				break;
 			case 'Defensive':
 				$this->PositionGroup->FF_StatsGroupName = $position->stats_group;
-				$this->PositionGroup->FF_StatsGroupId = 4;
+				//$this->PositionGroup->FF_StatsGroupId = 4;
 				break;
 			default:
 				$this->PositionGroup->FF_StatsGroupName = 'Other';
-				$this->PositionGroup->FF_StatsGroupId = 3;
+				//$this->PositionGroup->FF_StatsGroupId = 3;
 				break;
 		}
 		

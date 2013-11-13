@@ -14,6 +14,7 @@ define('CURR_DIR', dirname(__FILE__) . DS);
 
 $presentation = array('main' => CURR_DIR . 'main.php', );
 $scripts = CURR_DIR .'Scripts'. DS;
+
 $tables = array(
 		'app_config' => (Data::GetTableRowCount('app_config')),
 		'ff_stats_groups' => (Data::GetTableRowCount('ff_stats_groups')),

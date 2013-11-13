@@ -29,7 +29,7 @@ class CBSSports {
 				break;
 			case 'ff_team':
 				break;
-			case 'nfl_team':
+			case self::NFL_TEAM:
 				break;
             case 'nfl_player_profile':
                 break;
@@ -382,6 +382,15 @@ class Data {
 		
 	}
 	
+	function __destruct(){
+		global $LOG;
+		if(isset($LOG)){
+			foreach (self::$errorMsg as $msg){
+				$LOG->logDebug($msg);
+			}
+		}
+	}
+	
     /** @var string $query to be used by mysqli_stmt::prepare */
 	private $query;
     /** @var object $dbConn prexisting mysqli object to be used for database queries */
@@ -390,7 +399,7 @@ class Data {
 	private $parameters = array();
     /** @var string $typeString value to pass to mysqli_stmt::bind_param() to indicate data types going to the query */
 	private $typeString;
-	private $errorMsg = array();
+	public static $errorMsg = array();
 	
     /** @var bool $dataValided indicator for success matchTstring() checking $typeString, $parameters, and $query */
 	public $dataValidated;	
@@ -496,6 +505,9 @@ class Data {
      */
 	private function stmtPrepare(){
 		$this->stmt = $this->dbConn->prepare($this->query);
+		if ($this->stmt == FALSE) {
+			array_push(self::$errorMsg, "Failed to prepare statement (" .$this->dbConn->errno .") - ". $this->dbConn->error);
+		}
 	}  	
 	
     /**
@@ -513,10 +525,10 @@ class Data {
 		}
 		else{
 			if(!($this->dataValidated)){
-				array_push($this->errorMsg, "Data not validated");
+				array_push(self::$errorMsg, "Data not validated");
 			}
 			if(empty($this->stmt)){
-				array_push($this->errorMsg, "stmt is empty");
+				array_push(self::$errorMsg, "stmt is empty");
 			}
 		}
 	}
@@ -572,7 +584,7 @@ class Data {
 	}
 	protected function _selectFetchAll($query, &$dbConn, $assoc = FALSE){
 		if(!($result = $dbConn->query($query))){
-			echo "Query failed: (". $dbConn->errno .") ". $dbConn->error;
+			array_push(self::$errorMsg, "Query failed: (". $dbConn->errno .") ". $dbConn->error);
 			return FALSE;
 		}
 		if ($assoc === FALSE) {	
@@ -607,7 +619,8 @@ class Data {
 	 * @param mysqli $dbConn optional database connection resource to use
 	 * @return boolean|string
 	 */
-	public static function GetTableRowCount($table, $col = NULL, &$dbConn = NULL){
+	public static function GetTableRowCount($table, $col = NULL, &$dbConn = NULL, $where = NULL){
+		$closeConn = FALSE;
 		if(empty($table) ){
 			return FALSE;
 		}
@@ -620,16 +633,28 @@ class Data {
 			}
 			else{
 				$conn = &$db->conn;
+				$closeConn = TRUE;
 			}
 		}
-		if(!($result = $conn->query("SELECT COUNT($col) as num FROM $table"))){
-			$conn->close();
+		else{
+			$conn = $dbConn;
+		}
+		$query = "SELECT COUNT($col) as num from $table ";
+		if (!(empty($where))) {
+			$query .= $where;
+		}
+		else{
+			$query .= "WHERE 1=1";
+		}
+		if(!($result = $conn->query($query))){
+			array_push(self::$errorMsg, "Error: (" . $conn->errno .") - ". $conn->error);
+			if ($closeConn == TRUE) { $conn->close(); }
 			return FALSE;
 		}
 		else{
 			$count = $result->fetch_assoc();
 			$count = $count['num'];
-			$conn->close();
+			if($closeConn == TRUE){ $conn->close(); }
 			return $count;
 		}
 	}
