@@ -23,7 +23,7 @@ foreach ($positions['data']->body->positions as $position){
 		$data = Data::WithValues($db->conn, $insertStatsGroupQuery, 's', array($pos->PositionGroup->FF_StatsGroupName));
 		$data->bindParameters();
 		if(!($data->stmt->execute())){
-			array_push($data->errorMsg, "Execute failed: (". $data->stmt->errno .") ".$data->stmt->error);
+			array_push($data::$errorMsg, "Execute failed: (". $data->stmt->errno .") ".$data->stmt->error);
 			break;
 		}
 	}
@@ -37,7 +37,7 @@ foreach ($positions['data']->body->positions as $position){
 			$posData = Data::WithValues($db->conn, $insertPosQuery, 'ssi', array($pos->Abbr, $pos->Name, $grp[0]['id']) );
 			$posData->bindParameters();
 			if(!($posData->stmt->execute())){
-				array_push($posData->errorMsg, "Execute Failed: (". $posData->stmt->errno .") ". $posData->stmt-error);
+				array_push($posData::$errorMsg, "Execute Failed: (". $posData->stmt->errno .") ". $posData->stmt-error);
 				break;
 			}
 		}

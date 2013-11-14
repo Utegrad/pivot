@@ -25,25 +25,25 @@ class CBSSports {
 				break;
 			case self::FF_POSITION:
 				break;
-			case 'ff_owner':
+			case self::FF_OWNER :
 				break;
-			case 'ff_team':
+			case self::FF_TEAM :
 				break;
 			case self::NFL_TEAM:
 				break;
-            case 'nfl_player_profile':
+            case self::NFL_PLAYER_PROFILE :
                 break;
-            case 'rosters';
+            case self::ROSTERS ;
                 break;
-            case 'league/fantasy-points/weekly-scoring':
+            case self::FPSWS :
             	// should do some error checking on the suffix value because an empty string won't work here
             	if($this->suffixMod === NULL){
             		array_push($this->ErrorMessage, "No suffix passed for weekly scoring request");
             	}
             	break;
-            case 'league/dates' :
+            case self::DATES :
             	break;
-            case 'league/details':
+            case self::DETAILS:
             	break;
 			default:
 				array_push($this->ErrorMessage, 'Undefined entity');
@@ -445,58 +445,6 @@ class Data {
 			array_push($this->errorMsg, "Type string count doesn't match num parameters in query.");
 			return FALSE;
 		}
-		/*foreach($typeStringArray as $key => $value){
-			echo "<p>Key: $key - Value: $value</p>";
-			switch($value){
-				case 'i':
-					if(!is_int($paramArray[$key]))
-					{
-						 array_push($this->errorMsg, "Int specified and not found");
-						 array_push($this->errorMsg, "Paramater Value: ". $paramArray[$key]);
-						return FALSE;
-						break;
-					}
-					else{
-	#					echo "<p>Int found</p>";
-						$returnValue = TRUE;
-						break;
-					}
-				case 'd':
-					if(!is_float($paramArray[$key]))
-					{
-						array_push($this->errorMsg, "Double specified and not found");
-						return FALSE;
-						break;
-					}
-					else{
-	#					echo "<p>Double found</p>";
-						$returnValue = TRUE;
-						break;
-					}
-				case 's':
-					if(!is_string($paramArray[$key]))
-					{
-						array_push($this->errorMsg, "String specified and not found.");
-						return FALSE;
-						break;
-					}
-					else
-					{
-	#					echo "<p>String found</p>";
-						$returnValue = TRUE;
-						break;
-					}	
-				case 'b':
-	#				echo "<p>Blob - don't think I really care on this one</p>";
-					$returnValue = TRUE;
-					#return FALSE;
-					break;
-				default:
-					array_push($this->errorMsg, "Parameter type didn't match type string.");
-					return FALSE;
-					break;
-			} // end case
-		} // end foreach($typeStringArray as $key => $value)*/
 		if($returnValue == TRUE){ return TRUE;}
   	} // end public static function matchTstring($typeString, array $paramArray, $query)
 

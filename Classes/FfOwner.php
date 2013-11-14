@@ -14,6 +14,8 @@ class FfOwner{
 	public $Name;
     /** @var FfTeam object from Classes/FfTeam.php */
 	public $FfTeam;
+	/** @var bool $Commissioner is this owner a commissioner for the league */
+	public $Commissioner;
 	
     /**
      * Instantiate self() with data from CBS Sports FF Owners data
@@ -29,6 +31,7 @@ class FfOwner{
 	protected function loadByJson(stdClass $owner){
 		$this->Id = $owner->id;
 		$this->Name = $owner->name;
+		$this->Commissioner = $owner->commissioner;
 	}
 }
 ?>

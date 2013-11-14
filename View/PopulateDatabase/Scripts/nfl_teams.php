@@ -23,7 +23,7 @@ foreach($nflTeamData['data']->body->pro_teams as $proTeam){
 		$teamData = Data::WithValues($db->conn, $insertProTeamQuery, 'sss', array($team->Abvr, $team->Name, $team->NickName) );
 		$teamData->bindParameters();
 		if(!($teamData->stmt->execute())){
-			array_push($teamData->errorMsg, "Execution error: (" .$teamData->stmt->errno. ") - ". $teamData->stmt->error);
+			array_push($teamData::$errorMsg, "Execution error: (" .$teamData->stmt->errno. ") - ". $teamData->stmt->error);
 			break;
 		}
 	}
