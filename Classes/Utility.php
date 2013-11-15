@@ -55,6 +55,15 @@ class CBSSports {
 		//return $returnValue;
 	}
 	
+	function __destruct(){
+		global $LOG;
+		if(isset($LOG)){
+			foreach ($this->ErrorMessage as $msg){
+				$LOG->logDebug($msg);
+			}
+		}
+	}
+	
 	/**
 	 * nfl_player data elements of the cURL urls.
 	 */
