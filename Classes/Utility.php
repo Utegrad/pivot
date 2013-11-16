@@ -139,7 +139,7 @@ class CBSSports {
 	 * 
 	 * @var string entityString
 	 */
-	private $entityString;
+	public $entityString;
 	/**
 	 * optional string passed to the __construct method.  
 	 * 
@@ -147,7 +147,7 @@ class CBSSports {
 	 * 
 	 * @var string suffixMod
 	 */
-	private $suffixMod;
+	public $suffixMod;
 	private $URLSuffix; 
 	private $timeout = 30;
 	/**
@@ -173,13 +173,32 @@ class CBSSports {
 		'league/details' => array( 'element' => 'league/details', 'suffix' => ''),
 	);
 
+	private $validElements = array(
+		self::NFL_PLAYER, self::FF_POSITION, self::FF_OWNER,
+		self::FF_TEAM, self::NFL_TEAM, self::NFL_PLAYER_PROFILE,
+		self::ROSTERS, self::FPSWS, self::DATES, self::DETAILS,
+	);
+	
+	public $curlHandle;
+	
+	public function SetCurlHandle(){
+		$this->curlHandle = curl_init();
+		
+	}
 	/** 
      * Retreives JSON data from CBS Sports API or FALSE if http request error.
-     * 
+     * @param bool $close close the curl handle after getting data
      * @return object|bool
      */
-	public function GetData(){
-		$crl = curl_init();
+	public function GetData($close = FALSE){
+		if(!($this->curlHandle)){
+			$this->SetCurlHandle();
+			$crl = $this->curlHandle;
+		}
+		else{
+			$crl = $this->curlHandle;
+		}
+		
 		$timeout = 30;
 
 		curl_setopt($crl, CURLOPT_URL, $this->GetURL);
@@ -195,7 +214,7 @@ class CBSSports {
 			curl_close($crl);
 			return FALSE;
 		}
-		curl_close($crl);
+		if ($close == TRUE) {curl_close($crl); }
 		$data = json_decode($ret);
 		return $data;
 	}
@@ -249,7 +268,20 @@ class CBSSports {
 		$this->URLSuffix = "?version=2.0&access_token=". $this->AccessToken ."&response_format=json"."&".$this->elements[$this->entityString]['suffix'];
 		$this->GetURL = $this->BaseURL. $this->Element .$this->URLSuffix;
 	}
-	
+	/**
+	 * Update the GetURL to make another request and reuse the curl handle
+	 */
+	public function UpdateURL($entity, $suffix = null){
+		if(!(in_array($entity, $this->validElements))){
+			return false;
+		}
+		else{
+			$this->entityString = $entity;
+			$this->suffixMod = $suffix;
+		}
+		$this->buildURL();
+		return true;
+	}
 	
 } // end class CBSSports
 

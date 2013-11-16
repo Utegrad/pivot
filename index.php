@@ -28,20 +28,28 @@ function microtime_float()
 	return ((float)$usec + (float)$sec);
 }
 
-$nflPlayerData = CBSSports::GetJsonData(CBSSports::NFL_PLAYER);
+/**
+ * @todo Try and speed this up by creating an object and reusing the curl handle
+ */
 
-$nflPlayerWeeklyScoring = CBSSports::GetJsonData(CBSSports::FPSWS, 'player_status=all');
+$cbsSports = new CBSSports(CBSSports::NFL_PLAYER);
+$nflPlayerData = $cbsSports->GetData();
 
-$ffTeamRosters = CBSSports::GetJsonData(CBSSports::ROSTERS, 'all');
+if($cbsSports->UpdateURL(CBSSports::FPSWS, 'player_status=all')){ $nflPlayerWeeklyScoring = $cbsSports->GetData(); }
+else{ array_push($cbsSports->ErrorMessage, "Problem updating GetURL with ". CBSSports::FPSWS ." to fetch new data"); }
+
+if($cbsSports->UpdateURL(CBSSports::ROSTERS, 'all')){ $ffTeamRosters = $cbsSports->GetData(TRUE); }
+else{ array_push($cbsSports->ErrorMessage, "Problem updating GetURL with ". CBSSports::ROSTERS ." to fetch new data"); }
+
 
 $playerSummarys = array();
 
-foreach($nflPlayerData['data']->body->players as $player){
+foreach($nflPlayerData->body->players as $player){
 	$p = NFLPlayer::withJson($player);
 	$periods = array();
 	$scores = array();
 	// find players fantasy team from roster data
-	foreach($ffTeamRosters['data']->body->rosters->teams as $team){
+	foreach($ffTeamRosters->body->rosters->teams as $team){
 		foreach ($team->players as $member){
 			if ($p->Id == $member->id) {
 				$p->FfTeam->Name = $team->name;
@@ -56,7 +64,7 @@ foreach($nflPlayerData['data']->body->players as $player){
 		$p->FfTeam->Name = 'Free Agent';
 	}
 	
-	foreach ($nflPlayerWeeklyScoring['data']->body->weekly_scoring->players as $plyr){
+	foreach ($nflPlayerWeeklyScoring->body->weekly_scoring->players as $plyr){
 		if($p->Id == $plyr->id){
 			// save periods[] for this player
 			foreach($plyr->periods as $period){
@@ -107,7 +115,10 @@ $populationScores = array();
 
 foreach($playerSummarys as $summary){
 	if (in_array($summary['pos'], $summary['relivantPositions'] )) {
-		$populationScores = array_merge($populationScores, $summary['scores']);
+		// $populationScores = array_merge($populationScores, $summary['scores']);
+		foreach($summary['scores'] as $score){
+			array_push($populationScores, $score);
+		}
 	}
 }
 
@@ -170,7 +181,7 @@ define('CURR_DIR', dirname(__FILE__) . DS);
 
 $presentation = array('main' => CURR_DIR . 'main.php', );
 
-require_once 'page.php';
+require_once APP_ROOT .'page.php';
 
 /* echo "<p>";
 foreach ($playerSummarys as $summary){
