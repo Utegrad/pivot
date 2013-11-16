@@ -6,6 +6,6 @@
 	<!-- StyleSheet: <?php echo $key; ?> -->
 	<link REL="stylesheet" type="text/css" href="<?php echo $APP_URL . $sheet; ?>" />
 <?php endforeach; ?>
-<title>Insert title here</title>
+<title>Fantasy Summary Data</title>
 </head>
 <body>
