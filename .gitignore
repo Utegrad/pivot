@@ -15,6 +15,9 @@ local.properties
 .classpath
 .settings/
 .loadpath
+.htaccess
+test.php
+temp.php
 
 # External tool builders
 .externalToolBuilders/
