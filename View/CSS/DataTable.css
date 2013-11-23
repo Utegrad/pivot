@@ -4,6 +4,9 @@
 	padding: 2px;
 	margin: 5px 0px 10px;
 	border-collapse: collapse;
+	font-size: small;
+	width: 695px;
+	
 }
 .row{
 	
@@ -22,6 +25,11 @@
 }
 .dataCell{
 	padding: 2px 5px;
+	text-align: center;
+}
+.firstCol{
+	text-align: left;
+	width: 140px;
 }
 .headingCell{
 	padding: 5px 10px;

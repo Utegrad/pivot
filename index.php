@@ -11,7 +11,7 @@ require_once APP_ROOT . 'Classes/FfTeam.php';
 require_once APP_ROOT . 'Classes/FfLeague.php';
 require_once APP_ROOT . 'Control/AvgScoreData.php';
 
-$token = Api::TouchToken();
+$token = Api::TouchToken('U2FsdGVkX1_S7jLOizChYvo7q2hKhCMy8AiThMOh3lI85U-wgpE7-vRWuWkyelOmiIaPWzBum0ARGa9lSSpgZKT2AZJ1WZhQJyEv9uyK8ypnS0Aaiw5CZbABE4zPIegT');
 if ($token == FALSE) {
 	echo "<h2>Problem getting token from the database or from _GET</h2>";
 	echo "<p><a href='". $APP_URL ."/View/PopulateDatabase/index.php'>Index</a></p>";

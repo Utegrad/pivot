@@ -1,10 +1,21 @@
 @CHARSET "ISO-8859-1";
-#content {margin: 5px 5px;
+#content {margin: 0px;
 			border: 4px solid #a1a1a1;
 			border-radius:10px;
-			padding:10px 10px; 
-			width: 770px;
+			padding-top: 5px;
+			padding-right: 10px;
+			padding-bottom: 10px;
+			padding-left: 10px; 
+			width: 710px;
+			font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
 		}
+h3{
+	margin-top: 3px;
+	margin-bottom: 5px;
+}
+p{
+	margin: 2px;
+}
 li {
 	list-style: none;
 }
