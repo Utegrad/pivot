@@ -1,0 +1,19 @@
+@CHARSET "ISO-8859-1";
+
+#posSelect{
+	/* float: left; */
+	padding: 5px;
+	/* padding-left: 5px; */
+}
+
+#fTeams{
+	/* float: left; */
+	border-top: 1px solid black;
+	padding: 5px;
+/* 	padding-right: 5px; */
+}
+
+select[multiple]{
+	width: 220px;
+}
+

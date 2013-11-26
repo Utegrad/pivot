@@ -65,3 +65,7 @@ a:active {
 	border-color: #aaa;
 	text-decoration: none;
 }
+
+#summary{
+	float: left;
+}

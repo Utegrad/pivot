@@ -297,6 +297,24 @@ class CBSSports {
  * @access public
  */
 class Helpers {
+	function __construct(){
+		
+	}
+	function __destruct(){
+		global $LOG;
+		if(isset($LOG)){
+			foreach ($this->Errors as $msg){
+				$LOG->logDebug($msg);
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @var array $Errors holds errors from methods for logging.
+	 */
+	public $Errors = array();
+
 	public static function searchIfExists($needle, $haystack ){
 		$exists = FALSE;
 		foreach($haystack as $value){
@@ -382,7 +400,12 @@ class Helpers {
 		}
 		if($returnValue == TRUE) return TRUE;
 	} // end public static function matchTstring($typeString, array $paramArray, $query)
-
+	
+	/**
+	 * returns the standard deviation of numbers passed as array
+	 * @param array $array numbers to calculate std dev of
+	 * @return number
+	 */
 	public static function sd($array){
 		/* return sqrt(
 				array_sum(
@@ -413,6 +436,46 @@ class Helpers {
 		return sprintf('%04X%04X-%04X-%04X-%04X-%04X%04X%04X', mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(16384, 20479), mt_rand(32768, 49151), mt_rand(0, 65535), mt_rand(0, 65535), mt_rand(0, 65535));
 	}
 }
+
+	/**
+	 * sets the scale and rating elements of the playerSummary passed as $playerSummary
+	 * @param number $popAvg
+	 * @param number $popMaxAvg
+	 * @param number $popStdDev
+	 * @param array $playerSummary
+	 */
+	public static function setPlayerRatingScale($popAvg, $popMaxAvg, $popStdDev, &$playerSummary){
+		if(empty($popAvg) || empty($popMaxAvg) || empty($popStdDev) || empty($playerSummary)){
+			return false;
+		}
+		$avgScoreBuckets = array(
+				(floor($popAvg)),
+				($popAvg + $popStdDev),
+				($popAvg + 2 * $popStdDev),
+				($popAvg + 3 * $popStdDev),
+		);
+		if($playerSummary['playerAvg'] > $popAvg){
+			$playerSummary['scale'] = 100 * (round(($playerSummary['playerAvg'] / $popMaxAvg), 2));
+			if($playerSummary['playerAvg'] > $avgScoreBuckets[0] && $playerSummary['playerAvg'] <= $avgScoreBuckets[1]){
+				$playerSummary['rating'] = 'Average';
+			}
+			elseif ($playerSummary['playerAvg'] > $avgScoreBuckets[1] && $playerSummary['playerAvg'] <= $avgScoreBuckets[2]){
+				$playerSummary['rating'] = 'Good';
+			}
+			elseif ($playerSummary['playerAvg'] > $avgScoreBuckets[2] && $playerSummary['playerAvg'] <= $avgScoreBuckets[3]){
+				$playerSummary['rating'] = 'Great';
+			}
+			elseif ($playerSummary['playerAvg'] > $avgScoreBuckets[3] ) {
+				$playerSummary['rating'] = 'Outstanding';
+			}
+		}
+		else{
+			$playerSummary['scale'] = 0;
+			$playerSummary['rating'] = 'Below Average';
+		}
+		return TRUE;
+	}
+	
 } // end class Helpers
 
 /**
