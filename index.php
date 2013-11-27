@@ -12,12 +12,6 @@ require_once APP_ROOT . 'Classes/FfLeague.php';
 require_once APP_ROOT . 'Control/AvgScoreData.php';
 require_once 'Cache/Lite.php';
 
-$token = Api::TouchToken();
-if ($token == FALSE) {
-	echo "<h2>Problem getting token from the database or from _GET</h2>";
-	echo "<p><a href='". $APP_URL ."/View/PopulateDatabase/index.php'>Index</a></p>";
-}
-
 $App->StyleSheets = array(
 		'Default' => 'View/CSS/default.css',
 		'DataTable' => 'View/CSS/DataTable.css',
@@ -42,6 +36,26 @@ else{ array_push($cbsSports->ErrorMessage, "Problem updating GetURL with ". CBSS
 
 if($cbsSports->UpdateURL(CBSSports::ROSTERS, 'all')){ $ffTeamRosters = $cbsSports->GetData(TRUE); }
 else{ array_push($cbsSports->ErrorMessage, "Problem updating GetURL with ". CBSSports::ROSTERS ." to fetch new data"); }
+
+// write contents of $nflPlayerData, $nflPlayerWeeklyScoring, and $ffTeamRosters to file on disk
+$playerDataFilePath = APP_ROOT . 'tmp/'. (date_timestamp_get(date_create())) .'PlayerData.txt';
+$weeklyScoringDataFilePath = APP_ROOT .'tmp/'. (date_timestamp_get(date_create())) . 'WeeklyScoring.txt';
+$rosterDataFilePath = APP_ROOT . 'tmp/' . (date_timestamp_get(date_create())) . 'RosterData.txt';
+
+$files = array(
+	$playerDataFilePath => $nflPlayerData,
+	$weeklyScoringDataFilePath => $nflPlayerWeeklyScoring,
+	$rosterDataFilePath => $ffTeamRosters,
+);
+
+foreach($files as $path => $data){
+	file_put_contents($path, (json_encode($data)));
+	/* $fp = fopen($path, "w");
+	fwrite($fp, $data);
+	fclose($fp); */
+}
+
+
 
 $playerSummarys = array();
 
@@ -167,23 +181,5 @@ define('CURR_DIR', dirname(__FILE__) . DS);
 $presentation = array('main' => CURR_DIR . 'main.php', );
 
 require_once APP_ROOT .'page.php';
-
-/* echo "<p>";
-foreach ($playerSummarys as $summary){
-	if((in_array($summary['pos'], $summary['relivantPositions']))){
-		$avg = round($summary['playerAvg'],2);
-		echo $summary['fullName'] .":";
-		echo "<ul>
-				<li>Avg: ". $avg ."</li>";
-		echo "<li>Max: ". $summary['playerMax'] ."</li>";
-		echo "<li>Min: ". $summary['playerMin'] ."</li>";
-		echo "<li>Rating: ". $summary['rating'] ."</li>";
-		echo "<li>Scale: ". $summary['scale'] ."</li>";
-		echo "</ul><br>";
-	}
-}
-echo "</p>"; */
-
-//require 'page.php';
 
 ?>

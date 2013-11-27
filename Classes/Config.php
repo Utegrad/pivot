@@ -36,6 +36,13 @@ class Api {
 	
 	public $AccessToken;
 	public $Errors = array();
+	public $url = "https://api.cbssports.com/general/oauth/generate_token";
+	public $app_id = "19979";
+	public $app_secret = "884437ba66c22ebc2fd7e5070ea4448d72db72c76bdf34d913";
+	public $user_id ="af25290de1c2e84bb65f189c4fb73451";
+	public $league_id = "11540-h2h";
+	public $sport = "football";
+	public $response_format = "JSON";
 	
 	/**
 	 * gets, sets, and returns $this-AccessToken with value from $_GET or database for use with CBS Sports API
@@ -65,50 +72,32 @@ class Api {
 	protected  function _setAccessToken($token = NULL){
 		if(isset($_GET['access_token'])){
 			$this->AccessToken = $_GET['access_token'];
-			if($this->_dbUpdateAccessToken($this->AccessToken)){
-				return TRUE;
-			}
-			else{
-				array_push($this->Errors, "Error updating Access Token in the database.");
-				return FALSE;
-			}
+			$this->user_id = $_GET['user_id'];
+			$this->league_id = $_GET['league_id'];
 		}
 		else{
-			if($token !== NULL){ // token given
-				if(strlen($token) != 128){
-					// we weren't given a valid string for the access token
-					array_push($this->Errors, "Invalid string passed for token");
-					return FALSE;
-				}
-				else{ // have a $token of the correct length
-					// update it in the database
-					if($this->_dbUpdateAccessToken($token)){ // set $this->AccessToken to $token given 
-						$this->AccessToken = $token;
-						return TRUE; 
-					}
-					else{
-						array_push($this->Errors, "Error updating Access Token in database from token: $token");
-						return FALSE;
-					}
-				}
-			}
-			else{ // no $token given - not running from CBS Sports iFrame
-				// get token from the database
-				$selectAccessToken = "SELECT access_token FROM app_config WHERE id = '". App::GetAppGuid() ."'";
-				$db = new Database();
-				require_once 'Utility.php';
-				$accessTokenArray = Data::SelectFetchAll($selectAccessToken, $db->conn, TRUE);
-				if (empty($accessTokenArray) || $accessTokenArray === FALSE) {
-					array_push($this->Errors, "No token given and unable to find one in the database");
-					$db->conn->close();
-					return FALSE;
-				}
-				else{  // set $this->AccessToken to value from database
-					$this->AccessToken = $accessTokenArray[0]['access_token'];
-					$db->conn->close();
-					return TRUE;
-				}
-			}
+			// get an after hours access token
+			$data = array(
+					'app_id' => $this->app_id,
+					'app_secret' => $this->app_secret,
+					'user_id' => $this->user_id,
+					'league_id' => $this->league_id,
+					'sport' => $this->sport,
+					'response_format' => $this->response_format,
+			);
+			
+			// use key 'http' even if you send the request to https://...
+			$options = array(
+					'http' => array(
+							'header'  => "Content-type: application/x-www-form-urlencoded",
+							'method'  => 'POST',
+							'content' => http_build_query($data),
+					),
+			);
+			$context  = stream_context_create($options);
+			$result = file_get_contents($this->url, false, $context);
+			$result = json_decode($result);
+			$this->AccessToken = $result->body->access_token;
 		}
 	} // end protected  function _setAccessToken()
 	

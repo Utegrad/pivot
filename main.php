@@ -1,4 +1,5 @@
-<?php echo "Overall Average of all scores : ". round($populationAvg,2) ."<br>
+<?php 
+echo "Overall Average of all scores : ". round($populationAvg,2) ."<br>
 		(excludes data from defensive position players)."; ?>
 <p>
 <table class="DataTable">

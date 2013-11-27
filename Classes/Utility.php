@@ -11,13 +11,18 @@ class CBSSports {
      * @return bool don't know if this is necessary
      */
 	function __construct($entity, $id = NULL){		
+		//$this->ErrorMessage = array();
 		require_once('Config.php');
 		$this->api = new Api();
-		
+		if(empty($this->api->AccessToken)){
+			array_push($this->ErrorMessage,"Error getting access token");
+		}
+		else{
 		$this->AccessToken = $this->api->AccessToken;
+		}
 		$this->entityString = $entity;
 		$this->suffixMod = $id;
-		$this->ErrorMessage = array();
+		
 		
 		//$returnValue = TRUE;
 		switch($this->entityString){
@@ -110,7 +115,7 @@ class CBSSports {
 	 * 
 	 *  @var array $ErrorMessage  
 	 */
-	public $ErrorMessage; 
+	public $ErrorMessage = array(); 
 	/**
 	 * AccessToken passed in query string from CBS Sports API
 	 * 
