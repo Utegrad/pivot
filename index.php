@@ -27,8 +27,32 @@ function microtime_float()
 /**
  * @todo Try and speed this up by creating an object and reusing the curl handle
  */
+$nflPlayerData = '';
+$nflPlayerWeeklyScoring = '';
+$ffTeamRosters = '';
 
-$cbsSports = new CBSSports(CBSSports::NFL_PLAYER);
+$playerDataFilePath = APP_ROOT . 'tmp/'. '1385533559' .'PlayerData.txt';
+$weeklyScoringDataFilePath = APP_ROOT .'tmp/'. '1385533559' . 'WeeklyScoring.txt';
+$rosterDataFilePath = APP_ROOT . 'tmp/' . '1385533559' . 'RosterData.txt';
+
+$files = array(
+		$playerDataFilePath => $nflPlayerData,
+		$weeklyScoringDataFilePath => $nflPlayerWeeklyScoring,
+		$rosterDataFilePath => $ffTeamRosters,
+);
+foreach($files as $path => &$data){
+	$data = json_decode(file_get_contents($path));
+	//file_put_contents($path, (json_encode($data)));
+	//$fp = fopen($path, "w");
+	//fwrite($fp, $data);
+	//fclose($fp);
+}
+$nflPlayerData = $files[$playerDataFilePath];
+$nflPlayerWeeklyScoring = $files[$weeklyScoringDataFilePath];
+$ffTeamRosters = $files[$rosterDataFilePath];
+
+
+/* $cbsSports = new CBSSports(CBSSports::NFL_PLAYER);
 $nflPlayerData = $cbsSports->GetData();
 
 if($cbsSports->UpdateURL(CBSSports::FPSWS, 'player_status=all')){ $nflPlayerWeeklyScoring = $cbsSports->GetData(); }
@@ -50,11 +74,11 @@ $files = array(
 
 foreach($files as $path => $data){
 	file_put_contents($path, (json_encode($data)));
-	/* $fp = fopen($path, "w");
-	fwrite($fp, $data);
-	fclose($fp); */
+	//$fp = fopen($path, "w");
+	//fwrite($fp, $data);
+	//fclose($fp); 
 }
-
+ */
 
 
 $playerSummarys = array();

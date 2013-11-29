@@ -2,7 +2,7 @@
 	class FfPosition{	
 	function __construct() {
 		require_once('FfStatsGroup.php');
-		$this->PositionGroup = new FfStatsGroup();
+		//$this->PositionGroup = new FfStatsGroup();
 	}
 	
 	const QB = 'QB';
