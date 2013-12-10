@@ -1,3 +1,5 @@
+<?php require_once APP_ROOT . 'Classes/FfPosition.php';?>
+
 <div>
 	<h3>Fantasy Scores Summary</h3>
 	<div id="posSelect" class="filter">Include Positions:<br>

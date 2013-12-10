@@ -200,6 +200,17 @@ class Database {
 			array_push($this->errorMsgs, "Failed to connect to MySQL: (". $this->conn->connect_errno .") ". $this->conn->connect_error);
 		}
 	}
+	function __destruct(){
+		global $LOG;
+		if(isset($LOG)){
+			foreach ($this->errorMsgs as $msg){
+				$LOG->logDebug($msg);
+			}
+		}
+		if(isset($this->conn)){
+			$this->conn->close();
+		}
+	}
 	private $connectInfo = array( 
 		'host' => 'localhost',
 		'username' => 'FFApplication',

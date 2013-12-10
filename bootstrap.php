@@ -6,7 +6,7 @@ require APP_ROOT . 'Classes/Config.php';
 require APP_ROOT . 'include/KLogger.php';
 
 $App = new App();
-$APP_URL = $App->APP_URL;
+$APP_URL = App::GetAppURL();
 $LOG = new KLogger(APP_ROOT . 'tmp/', KLogger::DEBUG);
 
 ?>
